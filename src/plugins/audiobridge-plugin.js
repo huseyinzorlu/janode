@@ -1,68 +1,68 @@
-'use strict';
+"use strict";
 
 /**
  * This module contains the implementation of the AudioBridge plugin (ref. {@link https://janus.conf.meetecho.com/docs/audiobridge.html}).
  * @module audiobridge-plugin
  */
 
-import Handle from '../handle.js';
+import Handle from "../handle.js";
 
 /* The plugin ID exported in the plugin descriptor */
-const PLUGIN_ID = 'janus.plugin.audiobridge';
+const PLUGIN_ID = "janus.plugin.audiobridge";
 
 /* These are the requests defined for the Janus AudioBridge API */
-const REQUEST_JOIN = 'join';
-const REQUEST_LIST_PARTICIPANTS = 'listparticipants';
-const REQUEST_KICK = 'kick';
-const REQUEST_CONFIGURE = 'configure';
-const REQUEST_LEAVE = 'leave';
-const REQUEST_AUDIO_HANGUP = 'hangup';
-const REQUEST_EXISTS = 'exists';
-const REQUEST_LIST_ROOMS = 'list';
-const REQUEST_CREATE = 'create';
-const REQUEST_DESTROY = 'destroy';
-const REQUEST_RECORDING = 'enable_recording';
-const REQUEST_ALLOW = 'allowed';
-const REQUEST_RTP_FWD_START = 'rtp_forward';
-const REQUEST_RTP_FWD_STOP = 'stop_rtp_forward';
-const REQUEST_RTP_FWD_LIST = 'listforwarders';
-const REQUEST_SUSPEND_PARTICIPANT = 'suspend';
-const REQUEST_RESUME_PARTICIPANT = 'resume';
-const REQUEST_MUTE_PARTICIPANT = 'mute';
-const REQUEST_UNMUTE_PARTICIPANT = 'unmute';
-const REQUEST_MUTE_ROOM = 'unmute_room';
-const REQUEST_UNMUTE_ROOM = 'unmute_room';
+const REQUEST_JOIN = "join";
+const REQUEST_LIST_PARTICIPANTS = "listparticipants";
+const REQUEST_KICK = "kick";
+const REQUEST_CONFIGURE = "configure";
+const REQUEST_LEAVE = "leave";
+const REQUEST_AUDIO_HANGUP = "hangup";
+const REQUEST_EXISTS = "exists";
+const REQUEST_LIST_ROOMS = "list";
+const REQUEST_CREATE = "create";
+const REQUEST_DESTROY = "destroy";
+const REQUEST_RECORDING = "enable_recording";
+const REQUEST_ALLOW = "allowed";
+const REQUEST_RTP_FWD_START = "rtp_forward";
+const REQUEST_RTP_FWD_STOP = "stop_rtp_forward";
+const REQUEST_RTP_FWD_LIST = "listforwarders";
+const REQUEST_SUSPEND_PARTICIPANT = "suspend";
+const REQUEST_RESUME_PARTICIPANT = "resume";
+const REQUEST_MUTE_PARTICIPANT = "mute";
+const REQUEST_UNMUTE_PARTICIPANT = "unmute";
+const REQUEST_MUTE_ROOM = "unmute_room";
+const REQUEST_UNMUTE_ROOM = "unmute_room";
 
 /* These are the events/responses that the Janode plugin will manage */
 /* Some of them will be exported in the plugin descriptor */
 const PLUGIN_EVENT = {
-  JOINED: 'audiobridge_joined',
-  PEER_JOINED: 'audiobridge_peer_joined',
-  PARTICIPANTS_LIST: 'audiobridge_participants_list',
-  CONFIGURED: 'audiobridge_configured',
-  PEER_CONFIGURED: 'audiobridge_peer_configured',
-  LEAVING: 'audiobridge_leaving',
-  AUDIO_HANGINGUP: 'audiobridge_hangingup',
-  PEER_LEAVING: 'audiobridge_peer_leaving',
-  KICKED: 'audiobridge_kicked',
-  PEER_KICKED: 'audiobridge_peer_kicked',
-  TALKING: 'audiobridge_talking',
-  PEER_TALKING: 'audiobridge_peer_talking',
-  SUSPENDED: 'audiobridge_suspended',
-  PEER_SUSPENDED: 'audiobridge_peer_suspended',
-  RESUMED: 'audiobridge_resumed',
-  PEER_RESUMED: 'audiobridge_peer_resumed',
-  EXISTS: 'audiobridge_exists',
-  ROOMS_LIST: 'audiobridge_list',
-  CREATED: 'audiobridge_created',
-  DESTROYED: 'audiobridge_destroyed',
-  RECORDING: 'audiobrige_recording',
-  RTP_FWD: 'audiobridge_rtp_fwd',
-  FWD_LIST: 'audiobridge_rtp_list',
-  ALLOWED: 'audiobridge_allowed',
-  ROOM_MUTED: 'audiobridge_room_muted',
-  SUCCESS: 'audiobridge_success',
-  ERROR: 'audiobridge_error',
+  JOINED: "audiobridge_joined",
+  PEER_JOINED: "audiobridge_peer_joined",
+  PARTICIPANTS_LIST: "audiobridge_participants_list",
+  CONFIGURED: "audiobridge_configured",
+  PEER_CONFIGURED: "audiobridge_peer_configured",
+  LEAVING: "audiobridge_leaving",
+  AUDIO_HANGINGUP: "audiobridge_hangingup",
+  PEER_LEAVING: "audiobridge_peer_leaving",
+  KICKED: "audiobridge_kicked",
+  PEER_KICKED: "audiobridge_peer_kicked",
+  TALKING: "audiobridge_talking",
+  PEER_TALKING: "audiobridge_peer_talking",
+  SUSPENDED: "audiobridge_suspended",
+  PEER_SUSPENDED: "audiobridge_peer_suspended",
+  RESUMED: "audiobridge_resumed",
+  PEER_RESUMED: "audiobridge_peer_resumed",
+  EXISTS: "audiobridge_exists",
+  ROOMS_LIST: "audiobridge_list",
+  CREATED: "audiobridge_created",
+  DESTROYED: "audiobridge_destroyed",
+  RECORDING: "audiobrige_recording",
+  RTP_FWD: "audiobridge_rtp_fwd",
+  FWD_LIST: "audiobridge_rtp_list",
+  ALLOWED: "audiobridge_allowed",
+  ROOM_MUTED: "audiobridge_room_muted",
+  SUCCESS: "audiobridge_success",
+  ERROR: "audiobridge_error",
 };
 
 /**
@@ -130,49 +130,49 @@ class AudioBridgeHandle extends Handle {
 
       /* The plugin will emit an event only if the handle does not own the transaction */
       /* That means that a transaction has already been closed or this is an async event */
-      const emit = (this.ownsTransaction(transaction) === false);
+      const emit = this.ownsTransaction(transaction) === false;
 
       /* Use the "janode" property to store the output event */
       janus_message._janode = janode_event;
 
       switch (audiobridge) {
-
         /* success response */
-        case 'success':
+        case "success":
           /* Room exists API */
-          if (typeof message_data.exists !== 'undefined') {
+          if (typeof message_data.exists !== "undefined") {
             janode_event.data.exists = message_data.exists;
             janode_event.event = PLUGIN_EVENT.EXISTS;
             break;
           }
           /* Room list API */
-          if (typeof message_data.list !== 'undefined') {
+          if (typeof message_data.list !== "undefined") {
             janode_event.data.list = message_data.list;
             janode_event.event = PLUGIN_EVENT.ROOMS_LIST;
             break;
           }
           /* Enable recording API */
-          if (typeof message_data.record !== 'undefined') {
+          if (typeof message_data.record !== "undefined") {
             janode_event.data.record = message_data.record;
             janode_event.event = PLUGIN_EVENT.RECORDING;
             break;
           }
 
           /* RTP forwarding started/stopped */
-          if (typeof message_data.stream_id !== 'undefined') {
+          if (typeof message_data.stream_id !== "undefined") {
             janode_event.data.forwarder = {
               host: message_data.host,
               audio_port: message_data.port,
               audio_stream: message_data.stream_id,
             };
             /* Forwarding group info */
-            if (message_data.group) janode_event.data.forwarder.group = message_data.group;
+            if (message_data.group)
+              janode_event.data.forwarder.group = message_data.group;
             janode_event.event = PLUGIN_EVENT.RTP_FWD;
             break;
           }
 
           /* Generic success (might be token disable) */
-          if (typeof message_data.allowed !== 'undefined') {
+          if (typeof message_data.allowed !== "undefined") {
             janode_event.data.list = message_data.allowed;
           }
           /* In this case the "event" field of the Janode event is "success" */
@@ -180,80 +180,92 @@ class AudioBridgeHandle extends Handle {
           break;
 
         /* Joined an audio bridge */
-        case 'joined':
+        case "joined":
           /* If the message contains the id field, the event is for this handle */
-          if (typeof message_data.id !== 'undefined') {
+          if (typeof message_data.id !== "undefined") {
             /* Set the room, feed and display properties */
             this.room = room;
             this.feed = message_data.id;
             /* Set event data (feed, display name, setup, muted etc.) */
             janode_event.data.feed = message_data.id;
-            if (typeof message_data.rtp !== 'undefined') {
+            if (typeof message_data.rtp !== "undefined") {
               janode_event.data.rtp_participant = message_data.rtp;
               /* This is left here just for backward compatibility */
               /* It will be removed eventually */
               janode_event.data.rtp = message_data.rtp;
             }
             /* Add participants data */
-            janode_event.data.participants = message_data.participants.map(({ id, display, muted, setup, talking, suspended }) => {
+            janode_event.data.participants = message_data.participants.map(
+              ({ id, display, muted, setup, talking, suspended }) => {
+                const peer = {
+                  feed: id,
+                  display,
+                  muted,
+                  setup,
+                };
+                if (typeof talking !== "undefined") peer.talking = talking;
+                if (typeof suspended !== "undefined")
+                  peer.suspended = suspended;
+                return peer;
+              }
+            );
+            janode_event.event = PLUGIN_EVENT.JOINED;
+          } else if (
+          /* If the event contains the participants field, this is the join of another peer */
+            message_data.participants &&
+            message_data.participants.length == 1
+          ) {
+            janode_event.data.feed = message_data.participants[0].id;
+            if (typeof message_data.participants[0].display === "string")
+              janode_event.data.display = message_data.participants[0].display;
+            if (typeof message_data.participants[0].muted !== "undefined")
+              janode_event.data.muted = message_data.participants[0].muted;
+            if (typeof message_data.participants[0].setup !== "undefined")
+              janode_event.data.setup = message_data.participants[0].setup;
+            if (typeof message_data.participants[0].suspended !== "undefined")
+              janode_event.data.suspended =
+                message_data.participants[0].suspended;
+            janode_event.event = PLUGIN_EVENT.PEER_JOINED;
+          }
+          break;
+
+        /* Participants list */
+        case "participants":
+          janode_event.data.participants = message_data.participants.map(
+            ({ id, display, muted, setup, talking, suspended }) => {
               const peer = {
                 feed: id,
                 display,
                 muted,
                 setup,
               };
-              if (typeof talking !== 'undefined') peer.talking = talking;
-              if (typeof suspended !== 'undefined') peer.suspended = suspended;
+              if (typeof talking !== "undefined") peer.talking = talking;
+              if (typeof suspended !== "undefined") peer.suspended = suspended;
               return peer;
-            });
-            janode_event.event = PLUGIN_EVENT.JOINED;
-          }
-          /* If the event contains the participants field, this is the join of another peer */
-          else if (message_data.participants && message_data.participants.length == 1) {
-            janode_event.data.feed = message_data.participants[0].id;
-            if (typeof message_data.participants[0].display === 'string') janode_event.data.display = message_data.participants[0].display;
-            if (typeof message_data.participants[0].muted !== 'undefined') janode_event.data.muted = message_data.participants[0].muted;
-            if (typeof message_data.participants[0].setup !== 'undefined') janode_event.data.setup = message_data.participants[0].setup;
-            if (typeof message_data.participants[0].suspended !== 'undefined') janode_event.data.suspended = message_data.participants[0].suspended;
-            janode_event.event = PLUGIN_EVENT.PEER_JOINED;
-          }
-          break;
-
-        /* Participants list */
-        case 'participants':
-          janode_event.data.participants = message_data.participants.map(({ id, display, muted, setup, talking, suspended }) => {
-            const peer = {
-              feed: id,
-              display,
-              muted,
-              setup,
-            };
-            if (typeof talking !== 'undefined') peer.talking = talking;
-            if (typeof suspended !== 'undefined') peer.suspended = suspended;
-            return peer;
-          });
+            }
+          );
           janode_event.event = PLUGIN_EVENT.PARTICIPANTS_LIST;
           break;
 
         /* Audio bridge room created */
-        case 'created':
+        case "created":
           janode_event.event = PLUGIN_EVENT.CREATED;
           janode_event.data.permanent = message_data.permanent;
           break;
 
         /* Audio bridge room destroyed */
-        case 'destroyed':
+        case "destroyed":
           janode_event.event = PLUGIN_EVENT.DESTROYED;
           break;
 
         /* Audio bridge explicit hangup (different from core hangup!) */
-        case 'hangingup':
+        case "hangingup":
           janode_event.data.feed = message_data.id || this.feed;
           janode_event.event = PLUGIN_EVENT.AUDIO_HANGINGUP;
           break;
 
         /* This handle left the audio bridge */
-        case 'left':
+        case "left":
           janode_event.data.feed = message_data.id || this.feed;
           this.feed = null;
           this.room = null;
@@ -261,30 +273,35 @@ class AudioBridgeHandle extends Handle {
           break;
 
         /* Active forwarders list */
-        case 'forwarders':
-          janode_event.data.forwarders = message_data.rtp_forwarders.map(({ ip, port, stream_id, always_on, group }) => {
-            const forwarder = {
-              host: ip,
-              audio_port: port,
-              audio_stream: stream_id,
-              always: always_on,
-            };
-            if (group) forwarder.group = group;
-            return forwarder;
-          });
+        case "forwarders":
+          janode_event.data.forwarders = message_data.rtp_forwarders.map(
+            ({ ip, port, stream_id, always_on, group }) => {
+              const forwarder = {
+                host: ip,
+                audio_port: port,
+                audio_stream: stream_id,
+                always: always_on,
+              };
+              if (group) forwarder.group = group;
+              return forwarder;
+            }
+          );
           janode_event.event = PLUGIN_EVENT.FWD_LIST;
           break;
 
         /* Talking events */
-        case 'talking':
-        case 'stopped-talking':
+        case "talking":
+        case "stopped-talking":
           janode_event.data.feed = message_data.id;
-          janode_event.data.talking = (audiobridge === 'talking');
-          janode_event.event = message_data.id !== this.feed ? PLUGIN_EVENT.PEER_TALKING : PLUGIN_EVENT.TALKING;
+          janode_event.data.talking = audiobridge === "talking";
+          janode_event.event =
+            message_data.id !== this.feed
+              ? PLUGIN_EVENT.PEER_TALKING
+              : PLUGIN_EVENT.TALKING;
           break;
 
         /* Generic event (e.g. errors) */
-        case 'event':
+        case "event":
           /* AudioBridge error */
           if (error) {
             janode_event.event = PLUGIN_EVENT.ERROR;
@@ -294,83 +311,94 @@ class AudioBridgeHandle extends Handle {
             break;
           }
           /* Configuration success for this handle */
-          if (typeof message_data.result !== 'undefined') {
-            if (message_data.result === 'ok') {
+          if (typeof message_data.result !== "undefined") {
+            if (message_data.result === "ok") {
               janode_event.event = PLUGIN_EVENT.CONFIGURED;
             }
             break;
           }
           /* This handle or another participant has been resumed */
-          if (typeof message_data.resumed != 'undefined') {
+          if (typeof message_data.resumed != "undefined") {
             janode_event.data.feed = message_data.resumed;
             if (message_data.participants) {
               /* Add participants data */
-              janode_event.data.participants = message_data.participants.map(({ id, display, muted, setup, talking, suspended }) => {
-                const peer = {
-                  feed: id,
-                  display,
-                  muted,
-                  setup,
-                };
-                if (typeof talking !== 'undefined') peer.talking = talking;
-                if (typeof suspended !== 'undefined') peer.suspended = suspended;
-                return peer;
-              });
+              janode_event.data.participants = message_data.participants.map(
+                ({ id, display, muted, setup, talking, suspended }) => {
+                  const peer = {
+                    feed: id,
+                    display,
+                    muted,
+                    setup,
+                  };
+                  if (typeof talking !== "undefined") peer.talking = talking;
+                  if (typeof suspended !== "undefined")
+                    peer.suspended = suspended;
+                  return peer;
+                }
+              );
             }
             if (this.feed === janode_event.data.feed) {
               janode_event.event = PLUGIN_EVENT.RESUMED;
-            }
-            else {
+            } else {
               janode_event.event = PLUGIN_EVENT.PEER_RESUMED;
             }
             break;
           }
           /* This handle or another participant has been suspended */
-          if (typeof message_data.suspended != 'undefined') {
+          if (typeof message_data.suspended != "undefined") {
             janode_event.data.feed = message_data.suspended;
             if (this.feed === janode_event.data.feed) {
               janode_event.event = PLUGIN_EVENT.SUSPENDED;
-            }
-            else {
+            } else {
               janode_event.event = PLUGIN_EVENT.PEER_SUSPENDED;
             }
             break;
           }
           /* Peer leaving confirmation */
-          if (typeof message_data.leaving !== 'undefined') {
+          if (typeof message_data.leaving !== "undefined") {
             janode_event.data.feed = message_data.leaving;
             janode_event.event = PLUGIN_EVENT.PEER_LEAVING;
             break;
           }
           /* Room muted event */
-          if (typeof message_data.muted !== 'undefined') {
+          if (typeof message_data.muted !== "undefined") {
             janode_event.data.muted = message_data.muted;
             janode_event.event = PLUGIN_EVENT.ROOM_MUTED;
             break;
           }
           /* This handle or another participant kicked-out */
-          if (typeof message_data.kicked !== 'undefined') {
+          if (typeof message_data.kicked !== "undefined") {
             janode_event.data.feed = message_data.kicked;
             if (this.feed === janode_event.data.feed) {
               /* Reset handle status */
               this.feed = null;
               this.room = null;
               janode_event.event = PLUGIN_EVENT.KICKED;
-            }
-            else {
+            } else {
               janode_event.event = PLUGIN_EVENT.PEER_KICKED;
             }
             break;
           }
           /* Configuration events for other participants */
-          if (typeof message_data.participants !== 'undefined' && message_data.participants.length == 1) {
+          if (
+            typeof message_data.participants !== "undefined" &&
+            message_data.participants.length == 1
+          ) {
             janode_event.data.feed = message_data.participants[0].id;
-            if (typeof message_data.participants[0].display === 'string') janode_event.data.display = message_data.participants[0].display;
-            if (typeof message_data.participants[0].muted !== 'undefined') janode_event.data.muted = message_data.participants[0].muted;
-            if (typeof message_data.participants[0].setup !== 'undefined') janode_event.data.setup = message_data.participants[0].setup;
-            if (typeof message_data.participants[0].suspended !== 'undefined') janode_event.data.suspended = message_data.participants[0].suspended;
+            if (typeof message_data.participants[0].display === "string")
+              janode_event.data.display = message_data.participants[0].display;
+            if (typeof message_data.participants[0].muted !== "undefined")
+              janode_event.data.muted = message_data.participants[0].muted;
+            if (typeof message_data.participants[0].setup !== "undefined")
+              janode_event.data.setup = message_data.participants[0].setup;
+            if (typeof message_data.participants[0].suspended !== "undefined")
+              janode_event.data.suspended =
+                message_data.participants[0].suspended;
             /* when using "mute"/"unmute" management requests, janus will notify "configured" to all participants, including the involved one */
-            janode_event.event = janode_event.data.feed !== this.feed ? PLUGIN_EVENT.PEER_CONFIGURED : PLUGIN_EVENT.CONFIGURED;
+            janode_event.event =
+              janode_event.data.feed !== this.feed
+                ? PLUGIN_EVENT.PEER_CONFIGURED
+                : PLUGIN_EVENT.CONFIGURED;
             break;
           }
       }
@@ -416,32 +444,52 @@ class AudioBridgeHandle extends Handle {
    * @param {boolean} [params.generate_offer] - True to get Janus to send the SDP offer.
    * @returns {Promise<module:audiobridge-plugin~AUDIOBRIDGE_EVENT_JOINED>}
    */
-  async join({ room, feed, display, muted, pin, token, quality, volume, record, filename, suspended, pause_events, rtp_participant, group, generate_offer }) {
+  async join({
+    codec,
+    room,
+    feed,
+    display,
+    muted,
+    pin,
+    token,
+    quality,
+    volume,
+    record,
+    filename,
+    suspended,
+    pause_events,
+    rtp_participant,
+    group,
+    generate_offer,
+  }) {
     const body = {
       request: REQUEST_JOIN,
       room,
     };
-    if (typeof feed === 'string' || typeof feed === 'number') body.id = feed;
-    if (typeof display === 'string') body.display = display;
-    if (typeof muted === 'boolean') body.muted = muted;
-    if (typeof pin === 'string') body.pin = pin;
-    if (typeof token === 'string') body.token = token;
-    if (typeof quality === 'number') body.quality = quality;
-    if (typeof volume === 'number') body.volume = volume;
-    if (typeof record === 'boolean') body.record = record;
-    if (typeof filename === 'string') body.filename = filename;
-    if (typeof suspended === 'boolean') body.suspended = suspended;
-    if (typeof pause_events === 'boolean') body.pause_events = pause_events;
-    if (typeof rtp_participant === 'object' && rtp_participant) body.rtp = rtp_participant;
-    if (typeof group === 'string') body.group = group;
-    if (typeof generate_offer === 'boolean') body.generate_offer = generate_offer;
+    if (typeof feed === "string" || typeof feed === "number") body.id = feed;
+    if (typeof display === "string") body.display = display;
+    if (typeof muted === "boolean") body.muted = muted;
+    if (typeof pin === "string") body.pin = pin;
+    if (typeof token === "string") body.token = token;
+    if (typeof codec === "string") body.codec = codec;
+    if (typeof quality === "number") body.quality = quality;
+    if (typeof volume === "number") body.volume = volume;
+    if (typeof record === "boolean") body.record = record;
+    if (typeof filename === "string") body.filename = filename;
+    if (typeof suspended === "boolean") body.suspended = suspended;
+    if (typeof pause_events === "boolean") body.pause_events = pause_events;
+    if (typeof rtp_participant === "object" && rtp_participant)
+      body.rtp = rtp_participant;
+    if (typeof group === "string") body.group = group;
+    if (typeof generate_offer === "boolean")
+      body.generate_offer = generate_offer;
 
+    console.log("raw inside join body", JSON.stringify(body, null, 2));
     const response = await this.message(body);
     const { event, data: evtdata } = response._janode || {};
-    if (event === PLUGIN_EVENT.JOINED)
-      return evtdata;
+    if (event === PLUGIN_EVENT.JOINED) return evtdata;
     const error = new Error(`unexpected response to ${body.request} request`);
-    throw (error);
+    throw error;
   }
 
   /**
@@ -461,20 +509,32 @@ class AudioBridgeHandle extends Handle {
    * @param {RTCSessionDescription} [params.jsep=null] - JSEP offer
    * @returns {Promise<module:audiobridge-plugin~AUDIOBRIDGE_EVENT_CONFIGURED>}
    */
-  async configure({ display, muted, quality, bitrate, volume, record, filename, expected_loss, prebuffer, group, jsep = null }) {
+  async configure({
+    display,
+    muted,
+    quality,
+    bitrate,
+    volume,
+    record,
+    filename,
+    expected_loss,
+    prebuffer,
+    group,
+    jsep = null,
+  }) {
     const body = {
       request: REQUEST_CONFIGURE,
     };
-    if (typeof display === 'string') body.display = display;
-    if (typeof muted === 'boolean') body.muted = muted;
-    if (typeof quality === 'number') body.quality = quality;
-    if (typeof bitrate === 'number') body.bitrate = bitrate;
-    if (typeof volume === 'number') body.volume = volume;
-    if (typeof record === 'boolean') body.record = record;
-    if (typeof filename === 'string') body.filename = filename;
-    if (typeof expected_loss === 'number') body.expected_loss = expected_loss;
-    if (typeof prebuffer === 'number') body.prebuffer = prebuffer;
-    if (typeof group === 'string') body.group = group;
+    if (typeof display === "string") body.display = display;
+    if (typeof muted === "boolean") body.muted = muted;
+    if (typeof quality === "number") body.quality = quality;
+    if (typeof bitrate === "number") body.bitrate = bitrate;
+    if (typeof volume === "number") body.volume = volume;
+    if (typeof record === "boolean") body.record = record;
+    if (typeof filename === "string") body.filename = filename;
+    if (typeof expected_loss === "number") body.expected_loss = expected_loss;
+    if (typeof prebuffer === "number") body.prebuffer = prebuffer;
+    if (typeof group === "string") body.group = group;
 
     const response = await this.message(body, jsep);
     const { event, data: evtdata } = response._janode || {};
@@ -483,18 +543,20 @@ class AudioBridgeHandle extends Handle {
       /* Use feed and room from handle status */
       evtdata.feed = this.feed;
       evtdata.room = this.room;
-      if (typeof body.display !== 'undefined') evtdata.display = body.display;
-      if (typeof body.muted !== 'undefined') evtdata.muted = body.muted;
-      if (typeof body.quality !== 'undefined') evtdata.quality = body.quality;
-      if (typeof body.volume !== 'undefined') evtdata.volume = body.volume;
-      if (typeof body.record !== 'undefined') evtdata.record = body.record;
-      if (typeof body.filename !== 'undefined') evtdata.filename = body.filename;
-      if (typeof body.prebuffer !== 'undefined') evtdata.prebuffer = body.prebuffer;
-      if (typeof body.group !== 'undefined') evtdata.group = body.group;
+      if (typeof body.display !== "undefined") evtdata.display = body.display;
+      if (typeof body.muted !== "undefined") evtdata.muted = body.muted;
+      if (typeof body.quality !== "undefined") evtdata.quality = body.quality;
+      if (typeof body.volume !== "undefined") evtdata.volume = body.volume;
+      if (typeof body.record !== "undefined") evtdata.record = body.record;
+      if (typeof body.filename !== "undefined")
+        evtdata.filename = body.filename;
+      if (typeof body.prebuffer !== "undefined")
+        evtdata.prebuffer = body.prebuffer;
+      if (typeof body.group !== "undefined") evtdata.group = body.group;
       return evtdata;
     }
     const error = new Error(`unexpected response to ${body.request} request`);
-    throw (error);
+    throw error;
   }
 
   /**
@@ -510,10 +572,9 @@ class AudioBridgeHandle extends Handle {
 
     const response = await this.message(body);
     const { event, data: evtdata } = response._janode || {};
-    if (event === PLUGIN_EVENT.AUDIO_HANGINGUP)
-      return evtdata;
+    if (event === PLUGIN_EVENT.AUDIO_HANGINGUP) return evtdata;
     const error = new Error(`unexpected response to ${body.request} request`);
-    throw (error);
+    throw error;
   }
 
   /**
@@ -528,10 +589,9 @@ class AudioBridgeHandle extends Handle {
 
     const response = await this.message(body);
     const { event, data: evtdata } = response._janode || {};
-    if (event === PLUGIN_EVENT.LEAVING)
-      return evtdata;
+    if (event === PLUGIN_EVENT.LEAVING) return evtdata;
     const error = new Error(`unexpected response to ${body.request} request`);
-    throw (error);
+    throw error;
   }
 
   /*----------------*/
@@ -553,14 +613,13 @@ class AudioBridgeHandle extends Handle {
       request: REQUEST_LIST_PARTICIPANTS,
       room,
     };
-    if (typeof secret === 'string') body.secret = secret;
+    if (typeof secret === "string") body.secret = secret;
 
     const response = await this.message(body);
     const { event, data: evtdata } = response._janode || {};
-    if (event === PLUGIN_EVENT.PARTICIPANTS_LIST)
-      return evtdata;
+    if (event === PLUGIN_EVENT.PARTICIPANTS_LIST) return evtdata;
     const error = new Error(`unexpected response to ${body.request} request`);
-    throw (error);
+    throw error;
   }
 
   /**
@@ -578,7 +637,7 @@ class AudioBridgeHandle extends Handle {
       room,
       id: feed,
     };
-    if (typeof secret === 'string') body.secret = secret;
+    if (typeof secret === "string") body.secret = secret;
 
     const response = await this.message(body);
     const { event, data: evtdata } = response._janode || {};
@@ -589,7 +648,7 @@ class AudioBridgeHandle extends Handle {
       return evtdata;
     }
     const error = new Error(`unexpected response to ${body.request} request`);
-    throw (error);
+    throw error;
   }
 
   /**
@@ -607,10 +666,9 @@ class AudioBridgeHandle extends Handle {
 
     const response = await this.message(body);
     const { event, data: evtdata } = response._janode || {};
-    if (event === PLUGIN_EVENT.EXISTS)
-      return evtdata;
+    if (event === PLUGIN_EVENT.EXISTS) return evtdata;
     const error = new Error(`unexpected response to ${body.request} request`);
-    throw (error);
+    throw error;
   }
 
   /**
@@ -625,10 +683,9 @@ class AudioBridgeHandle extends Handle {
 
     const response = await this.message(body);
     const { event, data: evtdata } = response._janode || {};
-    if (event === PLUGIN_EVENT.ROOMS_LIST)
-      return evtdata;
+    if (event === PLUGIN_EVENT.ROOMS_LIST) return evtdata;
     const error = new Error(`unexpected response to ${body.request} request`);
-    throw (error);
+    throw error;
   }
 
   /**
@@ -657,38 +714,68 @@ class AudioBridgeHandle extends Handle {
    * @param {boolean} [params.denoise] - Enable denoising with rnnoise for all participants
    * @returns {Promise<module:audiobridge-plugin~AUDIOBRIDGE_EVENT_CREATED>}
    */
-  async create({ room, description, permanent, sampling_rate, bitrate, is_private, secret, pin, admin_key, record, filename, rec_dir,
-    talking_events, talking_level_threshold, talking_packets_threshold, expected_loss, prebuffer, allow_rtp, groups, denoise }) {
+  async create({
+    room,
+    description,
+    permanent,
+    sampling_rate,
+    bitrate,
+    is_private,
+    secret,
+    pin,
+    admin_key,
+    record,
+    filename,
+    rec_dir,
+    talking_events,
+    talking_level_threshold,
+    talking_packets_threshold,
+    expected_loss,
+    prebuffer,
+    allow_rtp,
+    groups,
+    denoise,
+  }) {
     const body = {
       request: REQUEST_CREATE,
       room,
     };
-    if (typeof description === 'string') body.description = description;
-    if (typeof permanent === 'boolean') body.permanent = permanent;
-    if (typeof sampling_rate === 'number') body.sampling = sampling_rate;
-    if (typeof bitrate === 'number') body.default_bitrate = bitrate;
-    if (typeof is_private === 'boolean') body.is_private = is_private;
-    if (typeof secret === 'string') body.secret = secret;
-    if (typeof pin === 'string') body.pin = pin;
-    if (typeof admin_key === 'string') body.admin_key = admin_key;
-    if (typeof record === 'boolean') body.record = record;
-    if (typeof filename === 'string') body.record_file = filename;
-    if (typeof rec_dir === 'string') body.record_dir = rec_dir;
-    if (typeof talking_events === 'boolean') body.audiolevel_event = talking_events;
-    if (typeof talking_level_threshold === 'number' && talking_level_threshold >= 0 && talking_level_threshold <= 127) body.audio_level_average = talking_level_threshold;
-    if (typeof talking_packets_threshold === 'number' && talking_packets_threshold > 0) body.audio_active_packets = talking_packets_threshold;
-    if (typeof expected_loss === 'number') body.default_expectedloss = expected_loss;
-    if (typeof prebuffer === 'number') body.default_prebuffering = prebuffer;
-    if (typeof allow_rtp === 'boolean') body.allow_rtp_participants = allow_rtp;
+    if (typeof description === "string") body.description = description;
+    if (typeof permanent === "boolean") body.permanent = permanent;
+    if (typeof sampling_rate === "number") body.sampling = sampling_rate;
+    if (typeof bitrate === "number") body.default_bitrate = bitrate;
+    if (typeof is_private === "boolean") body.is_private = is_private;
+    if (typeof secret === "string") body.secret = secret;
+    if (typeof pin === "string") body.pin = pin;
+    if (typeof admin_key === "string") body.admin_key = admin_key;
+    if (typeof record === "boolean") body.record = record;
+    if (typeof filename === "string") body.record_file = filename;
+    if (typeof rec_dir === "string") body.record_dir = rec_dir;
+    if (typeof talking_events === "boolean")
+      body.audiolevel_event = talking_events;
+    if (
+      typeof talking_level_threshold === "number" &&
+      talking_level_threshold >= 0 &&
+      talking_level_threshold <= 127
+    )
+      body.audio_level_average = talking_level_threshold;
+    if (
+      typeof talking_packets_threshold === "number" &&
+      talking_packets_threshold > 0
+    )
+      body.audio_active_packets = talking_packets_threshold;
+    if (typeof expected_loss === "number")
+      body.default_expectedloss = expected_loss;
+    if (typeof prebuffer === "number") body.default_prebuffering = prebuffer;
+    if (typeof allow_rtp === "boolean") body.allow_rtp_participants = allow_rtp;
     if (Array.isArray(groups)) body.groups = groups;
-    if (typeof denoise === 'boolean') body.denoise = denoise;
+    if (typeof denoise === "boolean") body.denoise = denoise;
 
     const response = await this.message(body);
     const { event, data: evtdata } = response._janode || {};
-    if (event === PLUGIN_EVENT.CREATED)
-      return evtdata;
+    if (event === PLUGIN_EVENT.CREATED) return evtdata;
     const error = new Error(`unexpected response to ${body.request} request`);
-    throw (error);
+    throw error;
   }
 
   /**
@@ -705,15 +792,14 @@ class AudioBridgeHandle extends Handle {
       request: REQUEST_DESTROY,
       room,
     };
-    if (typeof permanent === 'boolean') body.permanent = permanent;
-    if (typeof secret === 'string') body.secret = secret;
+    if (typeof permanent === "boolean") body.permanent = permanent;
+    if (typeof secret === "string") body.secret = secret;
 
     const response = await this.message(body);
     const { event, data: evtdata } = response._janode || {};
-    if (event === PLUGIN_EVENT.DESTROYED)
-      return evtdata;
+    if (event === PLUGIN_EVENT.DESTROYED) return evtdata;
     const error = new Error(`unexpected response to ${body.request} request`);
-    throw (error);
+    throw error;
   }
 
   /**
@@ -733,9 +819,9 @@ class AudioBridgeHandle extends Handle {
       room,
       record,
     };
-    if (typeof filename === 'string') body.record_file = filename;
-    if (typeof rec_dir === 'string') body.record_dir = rec_dir;
-    if (typeof secret === 'string') body.secret = secret;
+    if (typeof filename === "string") body.record_file = filename;
+    if (typeof rec_dir === "string") body.record_dir = rec_dir;
+    if (typeof secret === "string") body.secret = secret;
 
     const response = await this.message(body);
     const { event, data: evtdata } = response._janode || {};
@@ -744,7 +830,7 @@ class AudioBridgeHandle extends Handle {
       return evtdata;
     }
     const error = new Error(`unexpected response to ${body.request} request`);
-    throw (error);
+    throw error;
   }
 
   /**
@@ -764,14 +850,13 @@ class AudioBridgeHandle extends Handle {
       action,
     };
     if (list && list.length > 0) body.allowed = list;
-    if (typeof secret === 'string') body.secret = secret;
+    if (typeof secret === "string") body.secret = secret;
 
     const response = await this.message(body);
     const { event, data: evtdata } = response._janode || {};
-    if (event === PLUGIN_EVENT.SUCCESS)
-      return evtdata;
+    if (event === PLUGIN_EVENT.SUCCESS) return evtdata;
     const error = new Error(`unexpected response to ${body.request} request`);
-    throw (error);
+    throw error;
   }
 
   /**
@@ -791,28 +876,39 @@ class AudioBridgeHandle extends Handle {
    * @param {string} [params.admin_key] - The admin key needed for invoking the API
    * @returns {Promise<module:audiobridge-plugin~AUDIOBRIDGE_EVENT_RTP_FWD>}
    */
-  async startForward({ room, always, host, host_family, audio_port, ssrc, ptype, codec, group, secret, admin_key }) {
+  async startForward({
+    room,
+    always,
+    host,
+    host_family,
+    audio_port,
+    ssrc,
+    ptype,
+    codec,
+    group,
+    secret,
+    admin_key,
+  }) {
     const body = {
       request: REQUEST_RTP_FWD_START,
       room,
     };
-    if (typeof always === 'boolean') body.always_on = always;
-    if (typeof host === 'string') body.host = host;
-    if (typeof host_family === 'string') body.host_family = host_family;
-    if (typeof audio_port === 'number') body.port = audio_port;
-    if (typeof ssrc === 'number') body.ssrc = ssrc;
-    if (typeof ptype === 'number') body.ptype = ptype;
-    if (typeof codec === 'string') body.codec = codec;
-    if (typeof group === 'string') body.group = group;
-    if (typeof secret === 'string') body.secret = secret;
-    if (typeof admin_key === 'string') body.admin_key = admin_key;
+    if (typeof always === "boolean") body.always_on = always;
+    if (typeof host === "string") body.host = host;
+    if (typeof host_family === "string") body.host_family = host_family;
+    if (typeof audio_port === "number") body.port = audio_port;
+    if (typeof ssrc === "number") body.ssrc = ssrc;
+    if (typeof ptype === "number") body.ptype = ptype;
+    if (typeof codec === "string") body.codec = codec;
+    if (typeof group === "string") body.group = group;
+    if (typeof secret === "string") body.secret = secret;
+    if (typeof admin_key === "string") body.admin_key = admin_key;
 
     const response = await this.message(body);
     const { event, data: evtdata } = response._janode || {};
-    if (event === PLUGIN_EVENT.RTP_FWD)
-      return evtdata;
+    if (event === PLUGIN_EVENT.RTP_FWD) return evtdata;
     const error = new Error(`unexpected response to ${body.request} request`);
-    throw (error);
+    throw error;
   }
 
   /**
@@ -831,15 +927,14 @@ class AudioBridgeHandle extends Handle {
       room,
       stream_id: stream,
     };
-    if (typeof secret === 'string') body.secret = secret;
-    if (typeof admin_key === 'string') body.admin_key = admin_key;
+    if (typeof secret === "string") body.secret = secret;
+    if (typeof admin_key === "string") body.admin_key = admin_key;
 
     const response = await this.message(body);
     const { event, data: evtdata } = response._janode || {};
-    if (event === PLUGIN_EVENT.RTP_FWD)
-      return evtdata;
+    if (event === PLUGIN_EVENT.RTP_FWD) return evtdata;
     const error = new Error(`unexpected response to ${body.request} request`);
-    throw (error);
+    throw error;
   }
 
   /**
@@ -856,15 +951,14 @@ class AudioBridgeHandle extends Handle {
       request: REQUEST_RTP_FWD_LIST,
       room,
     };
-    if (typeof secret === 'string') body.secret = secret;
-    if (typeof admin_key === 'string') body.admin_key = admin_key;
+    if (typeof secret === "string") body.secret = secret;
+    if (typeof admin_key === "string") body.admin_key = admin_key;
 
     const response = await this.message(body);
     const { event, data: evtdata } = response._janode || {};
-    if (event === PLUGIN_EVENT.FWD_LIST)
-      return evtdata;
+    if (event === PLUGIN_EVENT.FWD_LIST) return evtdata;
     const error = new Error(`unexpected response to ${body.request} request`);
-    throw (error);
+    throw error;
   }
 
   /**
@@ -882,7 +976,7 @@ class AudioBridgeHandle extends Handle {
       room,
       id: feed,
     };
-    if (typeof secret === 'string') body.secret = secret;
+    if (typeof secret === "string") body.secret = secret;
 
     const response = await this.message(body);
     const { event, data: evtdata } = response._janode || {};
@@ -893,7 +987,7 @@ class AudioBridgeHandle extends Handle {
       return evtdata;
     }
     const error = new Error(`unexpected response to ${body.request} request`);
-    throw (error);
+    throw error;
   }
 
   /**
@@ -911,7 +1005,7 @@ class AudioBridgeHandle extends Handle {
       room,
       id: feed,
     };
-    if (typeof secret === 'string') body.secret = secret;
+    if (typeof secret === "string") body.secret = secret;
 
     const response = await this.message(body);
     const { event, data: evtdata } = response._janode || {};
@@ -922,7 +1016,7 @@ class AudioBridgeHandle extends Handle {
       return evtdata;
     }
     const error = new Error(`unexpected response to ${body.request} request`);
-    throw (error);
+    throw error;
   }
 
   /**
@@ -938,7 +1032,7 @@ class AudioBridgeHandle extends Handle {
       request: REQUEST_MUTE_ROOM,
       room,
     };
-    if (typeof secret === 'string') body.secret = secret;
+    if (typeof secret === "string") body.secret = secret;
 
     const response = await this.message(body);
     const { event, data: evtdata } = response._janode || {};
@@ -947,7 +1041,7 @@ class AudioBridgeHandle extends Handle {
       return evtdata;
     }
     const error = new Error(`unexpected response to ${body.request} request`);
-    throw (error);
+    throw error;
   }
 
   /**
@@ -963,7 +1057,7 @@ class AudioBridgeHandle extends Handle {
       request: REQUEST_UNMUTE_ROOM,
       room,
     };
-    if (typeof secret === 'string') body.secret = secret;
+    if (typeof secret === "string") body.secret = secret;
 
     const response = await this.message(body);
     const { event, data: evtdata } = response._janode || {};
@@ -972,7 +1066,7 @@ class AudioBridgeHandle extends Handle {
       return evtdata;
     }
     const error = new Error(`unexpected response to ${body.request} request`);
-    throw (error);
+    throw error;
   }
 
   /**
@@ -990,11 +1084,11 @@ class AudioBridgeHandle extends Handle {
     const body = {
       request: REQUEST_SUSPEND_PARTICIPANT,
       room,
-      id: feed
+      id: feed,
     };
-    if (typeof stop_record === 'boolean') body.stop_record = stop_record;
-    if (typeof pause_events === 'boolean') body.pause_events = pause_events;
-    if (typeof secret === 'string') body.secret = secret;
+    if (typeof stop_record === "boolean") body.stop_record = stop_record;
+    if (typeof pause_events === "boolean") body.pause_events = pause_events;
+    if (typeof secret === "string") body.secret = secret;
 
     const response = await this.message(body);
     const { event, data: evtdata } = response._janode || {};
@@ -1003,7 +1097,7 @@ class AudioBridgeHandle extends Handle {
       return evtdata;
     }
     const error = new Error(`unexpected response to ${body.request} request`);
-    throw (error);
+    throw error;
   }
 
   /**
@@ -1021,11 +1115,11 @@ class AudioBridgeHandle extends Handle {
     const body = {
       request: REQUEST_RESUME_PARTICIPANT,
       room,
-      id: feed
+      id: feed,
     };
-    if (typeof record === 'boolean') body.record = record;
-    if (typeof filename === 'string') body.filename = filename;
-    if (typeof secret === 'string') body.secret = secret;
+    if (typeof record === "boolean") body.record = record;
+    if (typeof filename === "string") body.filename = filename;
+    if (typeof secret === "string") body.secret = secret;
 
     const response = await this.message(body);
     const { event, data: evtdata } = response._janode || {};
@@ -1034,9 +1128,8 @@ class AudioBridgeHandle extends Handle {
       return evtdata;
     }
     const error = new Error(`unexpected response to ${body.request} request`);
-    throw (error);
+    throw error;
   }
-
 }
 
 /**
